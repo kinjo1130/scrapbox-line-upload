@@ -1,8 +1,8 @@
 const logSheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet()
 //Scrapboxのuidを記入
-const sid = ""
+const sid = PropertiesService.getScriptProperties().getProperty("SID");
 //Scrapboxのプロジェクト名(https://scrapbox.io/:projectName)
-const projectName = ""
+const projectName = PropertiesService.getScriptProperties().getProperty("PROJECTNAME");
 
 function getCookie() {
   return "connect.sid=" + sid;
@@ -26,7 +26,7 @@ function getToken() {
  * @param {string} title - タイトル
  * @param {string} main - 本文
  */
-const exportPages = (title, imageUrl, main) => {
+const exportPages = (title, main) => {
   logSheet.appendRow([Utilities.formatDate(new Date(), 'JST', 'yyyy-MM-dd HH:mm:ss'), 'エクスポート開始', title, main])
   try {
     const br = /[\r\n]+/g; //改行
