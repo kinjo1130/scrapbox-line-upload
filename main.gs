@@ -24,19 +24,15 @@ function getToken() {
 /**
  * 書き込み関数
  * @param {string} title - タイトル
- * @param {string} main - 本文
+ * @param {string} imageUrl - 画像url
  */
-const exportPages = (title, main) => {
-  logSheet.appendRow([Utilities.formatDate(new Date(), 'JST', 'yyyy-MM-dd HH:mm:ss'), 'エクスポート開始', title, main])
+const exportPages = (title, imageUrl) => {
+  logSheet.appendRow([Utilities.formatDate(new Date(), 'JST', 'yyyy-MM-dd HH:mm:ss'), 'エクスポート開始', title, imageUrl])
   try {
-    const br = /[\r\n]+/g; //改行
-    const rep = " "; //置換文字列
-
-    const date = Utilities.formatDate(new Date(), 'JST', 'yyyy-MM-dd HH:mm:ss');
     const importPages = [{
       // titleとlinesは同じ値を入れておけば大丈夫
       "title": `${title}`,  
-      "lines": [`【自動取り込み】${title}`,  ]
+      "lines": [`${title}`, `[${imageUrl}]`  ]
     }]
 
     const form = FetchApp.createFormData();

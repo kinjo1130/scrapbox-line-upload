@@ -1,4 +1,5 @@
 const ACCESS_TOKEN = PropertiesService.getScriptProperties().getProperty("ACCESSTOKEN");
+const GYAZO_API_KEY = PropertiesService.getScriptProperties().getProperty("GYAZOAPIKEY");
 function doPost(e) {
   for (let i = 0; i < JSON.parse(e.postData.contents).events.length; i++) {
     const event = JSON.parse(e.postData.contents).events[i];
@@ -43,9 +44,57 @@ function eventHandle(event) {
   }
   return message;
 }
+
+/**
+ * LINEからコンテンツを取得する
+ * @param {String} messageId メッセージID
+ */
+function getLineContent(messageId) {
+  try {
+    const url = `https://api-data.line.me/v2/bot/message/${messageId}/content`
+    let options = {
+      'method': 'get',
+      'headers': {
+        'Authorization': `Bearer ${ACCESS_TOKEN}`
+      }
+    };
+    return UrlFetchApp.fetch(url, options);
+  } catch (e) {
+    logSheet.appendRow([Utilities.formatDate(new Date(), 'JST', 'yyyy-MM-dd HH:mm:ss'), 'LINEコンテンツ取得失敗', messageId])
+  }
+}
+
+/**
+ * gyazoに画像をアップロード
+ * @param {blob} file - 画像ファイル
+ * @return {string} url - 画像url
+ */
+function uploadGyazo(file) {
+  try {
+    const res = UrlFetchApp.fetch("https://upload.gyazo.com/api/upload", {
+      method: "POST",
+      'payload': {
+        access_token: GYAZO_API_KEY,
+        imagedata: file.getAs('image/jpeg')
+      },
+      muteHttpExceptions: true,
+    })
+    return JSON.parse(res.getContentText()).url
+  } catch (e) {
+    logSheet.appendRow([Utilities.formatDate(new Date(), 'JST', 'yyyy-MM-dd HH:mm:ss'), 'アップロード失敗', e])
+  }
+}
+
+
 //メッセージイベントの処理
  function messagefunc(event) {
-  exportPages(event.message.text)
+   if(event.message.type === 'image'){
+     const content = getLineContent(event.message.id);
+     const imageUrl = uploadGyazo(content);
+     exportPages(event.message.text, imageUrl);
+     return;
+   }
+  exportPages(event.message.text, 'uuu');
   return { type: "text", text: event.message.text };
 }
 //ポストバックイベントの処理
